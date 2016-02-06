@@ -17,15 +17,15 @@ var TextPropertyComponent = require('./TextPropertyComponent');
  *    there are extra positions before and after non-editable child elements.
  * 3. Some native cursor behaviors need to be overidden.
  *
- * @class SurfaceSelection
+ * @class DOMSelection
  * @constructor
  * @param {Element} rootElement
  */
-function SurfaceSelection(surface) {
+function DOMSelection(surface) {
   this.surface = surface;
 }
 
-SurfaceSelection.Prototype = function() {
+DOMSelection.Prototype = function() {
 
   this.setSelection = function(sel) {
     // console.log('### renderSelection', sel.toString());
@@ -68,13 +68,13 @@ SurfaceSelection.Prototype = function() {
     var wSel = window.getSelection();
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    // console.log('SurfaceSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    // console.log('DOMSelection.getSelection()', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
     if (wSel.rangeCount === 0) {
       return null;
     }
     if (wSel.isCollapsed) {
       var coor = this._getCoordinate(wSel.anchorNode, wSel.anchorOffset, options);
-      range = this._createRange(coor, coor, false);
+      range = _createRange(coor, coor, false);
     }
     // HACK: special treatment for edge cases as addressed by #354.
     // Sometimes anchorNode and focusNodes are the surface
@@ -325,6 +325,6 @@ SurfaceSelection.Prototype = function() {
 
 };
 
-oo.initClass(SurfaceSelection);
+oo.initClass(DOMSelection);
 
-module.exports = SurfaceSelection;
+module.exports = DOMSelection;
