@@ -1,8 +1,6 @@
 "use strict";
 
 var EventEmitter = require('./EventEmitter');
-var ServerWebSocket = require('./ServerWebSocket');
-var uuid = require('./uuid');
 
 /**
   Websocket server implementation for client-side development of protocols
@@ -20,10 +18,19 @@ MessageQueue.Prototype = function() {
   /**
     A new client connects to the message queue
   */
-  this.connect = function(ws) {
+  this.connectClient = function(ws) {
     this.clients[ws.clientId] = ws;
 
     this.emit('connection:requested', ws.clientId);
+  };
+
+  /**
+    This is called by the server as a response to
+    connection:requested. ws is the server-side end of
+    the communication channel
+  */
+  this.connectServerClient = function(ws) {
+    this.clients[ws.clientId] = ws;
   };
 
   this.pushMessage = function(message) {
@@ -32,12 +39,13 @@ MessageQueue.Prototype = function() {
 
   this._processMessage = function() {
     var message = this.messages.shift();
+    if (!message) return; // nothing to process
     var to = message.to;
-    var from = message.from;
+    // var from = message.from;
     this.clients[to]._onMessage(message.data);
   };
 };
 
-EventEmitter.extend(QuasiWebSocketServer);
+EventEmitter.extend(MessageQueue);
 
-module.exports = QuasiWebSocketServer;
+module.exports = MessageQueue;

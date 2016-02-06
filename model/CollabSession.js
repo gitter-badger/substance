@@ -1,20 +1,29 @@
-"use strict";
+'use strict';
 
 var DocumentSession = require('./DocumentSession');
-var DocumentChange = require('./DocumentChange');
-
-var __id__ = 0;
+var WebSocket = require('../util/WebSocket');
 
 /**
-  Session that supports collaboration
+  Session that supports collaboration.
+
+  Keeps track of changes
 */
 
-function CollabSession() {
-  CollabSession.super.apply(this);
+function CollabSession(doc, options) {
+  CollabSession.super.call(this, doc, options);
 
+  this.messageQueue = options.messageQueue;
   this.pendingChanges = [];
 
-  
+  this.ws = new WebSocket(this.messageQueue);
+
+  this.ws.onopen = function() {
+    console.log('connection established for ws1');
+  };
+
+  this.ws.onmessage = function(data) {
+    console.log('data received', data);
+  };
 }
 
 CollabSession.Prototype = function() {
@@ -24,8 +33,3 @@ CollabSession.Prototype = function() {
 DocumentSession.extend(CollabSession);
 
 module.exports = CollabSession;
-
-
-
-
-
