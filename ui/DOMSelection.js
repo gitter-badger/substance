@@ -256,7 +256,7 @@ DOMSelection.Prototype = function() {
     if (props.length === 0) {
       return null;
     } else {
-      var doc = this.doc;
+      var doc = this.surface.getDocument();
       var first = props[0];
       var last = props[props.length-1];
       var startPath = _getPath(first);
