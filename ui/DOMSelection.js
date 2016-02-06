@@ -5,7 +5,6 @@ var $ = require('../util/jquery');
 var oo = require('../util/oo');
 var Coordinate = require('../model/Coordinate');
 var Range = require('../model/Range');
-var Selection = require('../model/Selection');
 var TextPropertyComponent = require('./TextPropertyComponent');
 
 /*
@@ -85,6 +84,12 @@ DOMSelection.Prototype = function() {
     }
     // console.log('### extracted range from DOM', range.toString);
     return range;
+  };
+
+  // only for legacy reasons
+  this.getSelection = function() {
+    console.error('DEPRECATED: use this.mapDOMSelection() instead.');
+    return this.mapDOMSelection.apply(this, arguments);
   };
 
   /*
@@ -232,7 +237,7 @@ DOMSelection.Prototype = function() {
     } else {
       charPos = 0;
     }
-    return new Coordinate(path, offset);
+    return new Coordinate(path, charPos);
   };
 
   /*
@@ -275,10 +280,11 @@ DOMSelection.Prototype = function() {
     }
   };
 
-
   function _compareNodes(node1, node2) {
     var cmp = node1.compareDocumentPosition(node2);
-    if (cmp&window.document.DOCUMENT_POSITION_FOLLOWING) {
+    // Note: the first two cases are necessary because POSITION_FOLLOWING
+    // has strange semantics when the relationship is actually hierarchical
+    if (cmp & window.document.DOCUMENT_POSITION_FOLLOWING) {
       return -1;
     } else if (cmp&window.document.DOCUMENT_POSITION_PRECEDING) {
       return 1;
@@ -287,15 +293,24 @@ DOMSelection.Prototype = function() {
     }
   }
 
+  var _r1, _r2;
+
   function _isReverse(anchorNode, anchorOffset, focusNode, focusOffset) {
     // the selection is reversed when the focus propertyEl is before
     // the anchor el or the computed charPos is in reverse order
-    var reverse = false;
     if (focusNode && anchorNode) {
-      var cmp = _compareNodes(focusNode, anchorNode);
-      reverse = ( cmp < 0 || (cmp === 0 && focusOffset < anchorOffset) );
+      if (!_r1) {
+        _r1 = window.document.createRange();
+        _r2 = window.document.createRange();
+      }
+      _r1.setStart(anchorNode, anchorOffset);
+      _r2.setStart(focusNode, focusOffset);
+      var cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2);
+      if (cmp === 1) {
+        return true;
+      }
     }
-    return reverse;
+    return false;
   }
 
   function _getPath(el) {

@@ -1,7 +1,7 @@
 "use strict";
 
 var EventEmitter = require('./EventEmitter');
-var uuid = require('./uuid');
+// var uuid = require('./uuid');
 var ServerWebSocket = require('./ServerWebSocket');
 
 /*
@@ -9,7 +9,7 @@ var ServerWebSocket = require('./ServerWebSocket');
   of protocols.
 
   @example
-  
+
   ```js
   var messageQueue = new MessageQueue();
   var wss = new WebSocketServer(messageQueue);
